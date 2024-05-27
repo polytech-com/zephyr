@@ -18,3 +18,10 @@ properties:
       Input should match pinctrl mapping in dtsi. The desired values can be
       found by searching for 'enum _xbar_' in
       modules/hal/nxp/mcux/mcux-sdk/devices/<device>/<device>.h.
+
+  xbar-configs:
+    type: array
+    description: |
+      Crossbar configurations. The desired values can be found by searching for
+      xbara_active_edge_t and xbara_request_t in
+      modules/hal/nxp/mcux/mcux-sdk/drivers/xbara/fsl_xbara.h.
