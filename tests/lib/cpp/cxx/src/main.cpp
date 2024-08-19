@@ -20,6 +20,7 @@
 #include <zephyr/net/buf.h>
 #include <zephyr/sys/crc.h>
 #include <zephyr/sys/crc.h>
+#include <zephyr/zbus/zbus.h>
 
 #include <zephyr/drivers/adc.h>
 #include <zephyr/drivers/bbram.h>
@@ -152,3 +153,17 @@ DEVICE_DT_DEFINE(DT_NODELABEL(test_dev1_dfr), NULL, NULL, NULL, NULL, POST_KERNE
 static int fake_pm_action(const struct device *dev,
 		enum pm_device_action pm_action) { return -1; }
 PM_DEVICE_DT_DEFINE(DT_NODELABEL(test_dev0_boot), fake_pm_action);
+
+ZBUS_LISTENER_DEFINE(bar_listner,  nullptr);
+
+struct foo_message {
+	int foo;
+};
+
+ZBUS_CHAN_DEFINE(foo_chan, /* Name */
+	foo_message, /* Message type */
+	nullptr, /* Validator */
+	nullptr, /* User Data */
+	ZBUS_OBSERVERS(bar_listner), /* observers */
+	ZBUS_MSG_INIT(0) /* Initial value {0} */
+);
