@@ -44,7 +44,7 @@ LOG_MODULE_REGISTER(soc, CONFIG_SOC_LOG_LEVEL);
  * TRDC ownership at first time and ELE is not able to release TRDC
  * ownership again for the following TRDC ownership request.
  */
-#define ELE_STICK_FAILED_STS 1
+#define ELE_STICK_FAILED_STS 0
 
 #if ELE_STICK_FAILED_STS
 #define ELE_IS_FAILED(x) (x != kStatus_Success)
