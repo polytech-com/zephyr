@@ -137,6 +137,21 @@ config LOG_BACKEND_NET_USE_DHCPV4_OPTION
 	  When enabled the syslog server IP address is read from the DHCPv4
 	  Log Server Option (7).
 
+config LOG_BACKEND_NET_TLS
+    bool "Enable TLS for networking backend"
+    depends on NET_SOCKETS_SOCKOPT_TLS
+    help
+        Enable TLS for networking backend. This will encrypt the syslog
+        messages before sending them to the server.
+
+config LOG_BACKEND_NET_TLS_PEER_NAME
+    string "Enable peer verification"
+    depends on NET_SOCKETS_SOCKOPT_TLS
+    default "localhost"
+    help
+        Enable peer verification for the TLS connection. This will verify
+        the server certificate.
+
 backend = NET
 backend-str = net
 source "subsys/logging/Kconfig.template.log_format_config"
