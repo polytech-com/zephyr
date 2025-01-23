@@ -17,6 +17,15 @@ LOG_MODULE_REGISTER(log_backend_net, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/net/net_mgmt.h>
 #include <zephyr/net/socket.h>
 
+#if defined(CONFIG_LOG_BACKEND_NET_TLS)
+#include <zephyr/net/tls_credentials.h>
+enum certificate_type {
+	SYSLOG_CERTIFICATE_TYPE_CA_CERTIFICATE = 1,
+	SYSLOG_CERTIFICATE_TYPE_DEVICE_CERTIFICATE,
+	SYSLOG_CERTIFICATE_TYPE_DEVICE_PRIVATE_KEY,
+};
+#endif
+
 /* Set this to 1 if you want to see what is being sent to server */
 #define DEBUG_PRINTING 0
 
@@ -117,7 +126,11 @@ static int do_net_init(struct log_backend_net_ctx *ctx)
 	}
 
 	if (ctx->is_tcp) {
+#if defined(CONFIG_LOG_BACKEND_NET_TLS)
+		proto = IPPROTO_TLS_1_2;
+#else
 		proto = IPPROTO_TCP;
+#endif
 		type = SOCK_STREAM;
 	}
 
@@ -129,7 +142,27 @@ static int do_net_init(struct log_backend_net_ctx *ctx)
 	}
 
 	ctx->sock = ret;
+#if defined(CONFIG_LOG_BACKEND_NET_TLS)
+	if (ctx->is_tcp) {
+		 const sec_tag_t sec_tls_tags[] = {
+			SYSLOG_CERTIFICATE_TYPE_CA_CERTIFICATE,
+			SYSLOG_CERTIFICATE_TYPE_DEVICE_CERTIFICATE,
+			SYSLOG_CERTIFICATE_TYPE_DEVICE_PRIVATE_KEY};
+		ret = setsockopt(ctx->sock, SOL_TLS, TLS_SEC_TAG_LIST, sec_tls_tags,
+				 sizeof(sec_tls_tags));
+		if (ret < 0) {
+			LOG_ERR("Failed to set TLS_SEC_TAG_LIST option (%d): %d", proto, errno);
+			ret = -errno;
+		}
 
+		ret = setsockopt(ctx->sock, SOL_TLS, TLS_HOSTNAME, CONFIG_LOG_BACKEND_NET_TLS_PEER_NAME,
+				 sizeof(CONFIG_LOG_BACKEND_NET_TLS_PEER_NAME));
+		if (ret < 0) {
+			LOG_ERR("Failed to set TLS_HOSTNAME option (%d): %d", proto, errno);
+			ret = -errno;
+		}
+	}
+#endif
 	if (IS_ENABLED(CONFIG_NET_HOSTNAME_ENABLE)) {
 		(void)strncpy(dev_hostname, net_hostname_get(), MAX_HOSTNAME_LEN);
 
