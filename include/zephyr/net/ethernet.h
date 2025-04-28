@@ -946,27 +946,7 @@ void net_eth_ipv6_mcast_to_mac_addr(const struct in6_addr *ipv6_addr,
  *
  * @return Hardware capabilities
  */
-static inline
-enum ethernet_hw_caps net_eth_get_hw_capabilities(struct net_if *iface)
-{
-	const struct device *dev = net_if_get_device(iface);
-	const struct ethernet_api *api = (struct ethernet_api *)dev->api;
-	enum ethernet_hw_caps caps = (enum ethernet_hw_caps)0;
-#if defined(CONFIG_NET_DSA) && !defined(CONFIG_NET_DSA_DEPRECATED)
-	struct ethernet_context *eth_ctx = net_if_l2_data(iface);
-
-	if (eth_ctx->dsa_port == DSA_CONDUIT_PORT) {
-		caps |= ETHERNET_DSA_CONDUIT_PORT;
-	} else if (eth_ctx->dsa_port == DSA_USER_PORT) {
-		caps |= ETHERNET_DSA_USER_PORT;
-	}
-#endif
-	if (api == NULL || api->get_capabilities == NULL) {
-		return caps;
-	}
-
-	return (enum ethernet_hw_caps)(caps | api->get_capabilities(dev));
-}
+enum ethernet_hw_caps net_eth_get_hw_capabilities(struct net_if *iface);
 
 /**
  * @brief Return ethernet device hardware configuration information.

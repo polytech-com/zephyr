@@ -82,6 +82,27 @@ void net_eth_ipv6_mcast_to_mac_addr(const struct in6_addr *ipv6_addr,
 	memcpy(mac_addr->addr + 2, &ipv6_addr->s6_addr[12], 4);
 }
 
+enum ethernet_hw_caps net_eth_get_hw_capabilities(struct net_if *iface)
+{
+	const struct device *dev = net_if_get_device(iface);
+	const struct ethernet_api *api = (struct ethernet_api *)dev->api;
+	enum ethernet_hw_caps caps = 0;
+#if defined(CONFIG_NET_DSA) && !defined(CONFIG_NET_DSA_DEPRECATED)
+	struct ethernet_context *eth_ctx = net_if_l2_data(iface);
+
+	if (eth_ctx->dsa_port == DSA_CONDUIT_PORT) {
+		caps |= ETHERNET_DSA_CONDUIT_PORT;
+	} else if (eth_ctx->dsa_port == DSA_USER_PORT) {
+		caps |= ETHERNET_DSA_USER_PORT;
+	}
+#endif
+	if (api == NULL || api->get_capabilities == NULL) {
+		return caps;
+	}
+
+	return (enum ethernet_hw_caps)(caps | api->get_capabilities(dev));
+}
+
 #define print_ll_addrs(pkt, type, len, src, dst)			   \
 	if (CONFIG_NET_L2_ETHERNET_LOG_LEVEL >= LOG_LEVEL_DBG) {	   \
 		char out[sizeof("xx:xx:xx:xx:xx:xx")];			   \
