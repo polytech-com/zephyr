@@ -125,7 +125,9 @@ static int dsa_netc_switch_setup(const struct dsa_switch_context *dsa_switch_ctx
 		.cfge.fltfa = kNETC_IPFRedirectToMgmtPort,
 		.cfge.hr = kNETC_SoftwareDefHR0,
 		.cfge.timecape = 1,
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
 		.cfge.rrt = 1,
+#endif
 	};
 
 	result = SWT_RxIPFAddTableEntry(&prv->swt_handle, &ipf_entry_cfg, &entry_id);
