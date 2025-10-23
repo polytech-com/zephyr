@@ -7,6 +7,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(net_dsa_port, CONFIG_NET_DSA_LOG_LEVEL);
 
+#include <stdio.h>
 #include <zephyr/net/ethernet.h>
 #include <zephyr/net/phy.h>
 #include <zephyr/net/dsa_core.h>
