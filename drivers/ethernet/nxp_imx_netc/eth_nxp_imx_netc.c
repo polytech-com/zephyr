@@ -117,6 +117,10 @@ static int netc_eth_rx(const struct device *dev)
 {
 	struct netc_eth_data *data = dev->data;
 	struct net_if *iface_dst = data->iface;
+	if (data->iface == NULL) {
+		printf("No destination interface for received frame %s\n", dev->name);
+		return -ENOBUFS;
+	}
 #if defined(NETC_SWITCH_NO_TAG_DRIVER_SUPPORT)
 	struct ethernet_context *ctx = net_if_l2_data(iface_dst);
 	struct dsa_switch_context *dsa_switch_ctx = ctx->dsa_switch_ctx;
