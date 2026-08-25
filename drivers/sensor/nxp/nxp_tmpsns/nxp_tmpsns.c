@@ -13,6 +13,9 @@
 
 struct nxp_tmpsns_config {
 	TMPSNS_Type *base;
+	int32_t low_alarm_temp;
+	int32_t high_alarm_temp;
+	int32_t panic_alarm_temp;
 };
 
 struct nxp_tmpsns_data {
@@ -60,14 +63,21 @@ static int nxp_tmpsns_init(const struct device *dev)
 	const struct nxp_tmpsns_config *cfg = dev->config;
 
 	TMPSNS_GetDefaultConfig(&config);
+	config.lowAlarmTemp = cfg->low_alarm_temp;
+	config.highAlarmTemp = cfg->high_alarm_temp;
+	config.panicAlarmTemp = cfg->panic_alarm_temp;
 	TMPSNS_Init(cfg->base, &config);
 
 	return 0;
 }
 
 #define NXP_TMPSNS_DEFINE(inst)                                                                    \
-	static struct nxp_tmpsns_config nxp_tmpsns_config_##inst = {                               \
-		.base = (TMPSNS_Type *)DT_INST_REG_ADDR(inst)};                                    \
+	static struct nxp_tmpsns_config nxp_tmpsns_config_##inst = {                                \
+		.base = (TMPSNS_Type *)DT_INST_REG_ADDR(inst),                                     \
+		.low_alarm_temp = (int32_t)DT_INST_PROP(inst, low_alarm_temp),                     \
+		.high_alarm_temp = (int32_t)DT_INST_PROP(inst, high_alarm_temp),                   \
+		.panic_alarm_temp = (int32_t)DT_INST_PROP(inst, panic_alarm_temp),                 \
+	};                                                                                         \
 	struct nxp_tmpsns_data nxp_tmpsns_data_##inst;                                             \
 	SENSOR_DEVICE_DT_INST_DEFINE(inst, nxp_tmpsns_init, NULL, &nxp_tmpsns_data_##inst,         \
 				     &nxp_tmpsns_config_##inst, POST_KERNEL,                       \

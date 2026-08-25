@@ -6,3 +6,25 @@ description: NXP TMPSNS
 compatible: "nxp,tmpsns"
 
 include: sensor-device.yaml
+
+properties:
+  low-alarm-temp:
+    type: int
+    required: false
+    default: 5
+    description: |
+      Low alarm temperature in degrees Celsius.
+
+  high-alarm-temp:
+    type: int
+    required: false
+    default: 25
+    description: |
+      High alarm temperature in degrees Celsius.
+
+  panic-alarm-temp:
+    type: int
+    required: false
+    default: 80
+    description: |
+      Panic alarm temperature in degrees Celsius.
