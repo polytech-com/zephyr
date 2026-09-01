@@ -306,6 +306,21 @@ static int mcux_lpi2c_recover_bus(const struct device *dev)
 restore:
 	(void)pinctrl_apply_state(config->pincfg, PINCTRL_STATE_DEFAULT);
 
+	/* A sustained line-low fault leaves the master state machine stuck busy
+	 * (MBF), which bit-banging cannot clear. The minimal fix is a master 
+	 * software reset (MCR[RST]).
+	 */
+
+	LPI2C_Type *base = (LPI2C_Type *)DEVICE_MMIO_NAMED_GET(dev, reg_base);
+	uint32_t clock_freq;
+
+	if (clock_control_get_rate(config->clock_dev, config->clock_subsys,
+					&clock_freq) == 0) {
+		LPI2C_MasterReset(base);
+		LPI2C_MasterSetBaudRate(base, clock_freq, config->bitrate);
+		LPI2C_MasterEnable(base, true);
+	}
+
 	k_sem_give(&data->lock);
 
 	return error;
