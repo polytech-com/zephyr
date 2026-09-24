@@ -549,8 +549,18 @@ static void gptp_state_machine(void)
 				NET_DBG("%s: Unknown port state", __func__);
 				break;
 			}
-		} else {
-			GPTP_GLOBAL_DS()->selected_role[port] = GPTP_PORT_DISABLED;
+		} else if (GPTP_GLOBAL_DS()->selected_role[port] != GPTP_PORT_DISABLED) {
+			printk("Disabling port %d because interface is down\n", port);
+			gptp_change_port_state(port, GPTP_PORT_DISABLED);
+			/* The BMCA did not make this decision, so let it redo it when
+			* the interface returns. Keeping the stored vector makes every
+			* announce from the same grandmaster REPEATED_MASTER_PORT,
+			* which never sets reselect -- the port then stays
+			* DisabledPort forever and SiteSyncSync drops every
+			* PortSyncSync, so the local clock is never disciplined.
+			*/
+			(void)memset(&GPTP_PORT_BMCA_DATA(port)->port_priority, 0xFF,
+				sizeof(struct gptp_priority_vector));
 		}
 
 		port_ds->prev_ptt_port_enabled = port_ds->ptt_port_enabled;
